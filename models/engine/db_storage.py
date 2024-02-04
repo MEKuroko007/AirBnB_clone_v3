@@ -54,16 +54,8 @@ class DBStorage:
 
     def count(self, cls=None):
         """Retrieves the number of objects of a class or all classes."""
-        classes = classes.values()
-
-        if not cls:
-            count = 0
-            for cl in classes:
-                count += len(models.storage.all(cl).values())
-        else:
-            count = len(models.storage.all(cls).values())
-
-        return count
+        obj_dict = models.storage.all(cls)
+        return len(obj_dict)
 
     def all(self, cls=None):
         """query on the current database session"""
