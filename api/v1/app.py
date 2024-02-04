@@ -9,8 +9,6 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-
-
 app_host = getenv('HBNB_API_HOST', '0.0.0.0')
 app_port = int(getenv('HBNB_API_PORT', '5000'))
 app.url_map.strict_slashes = False
