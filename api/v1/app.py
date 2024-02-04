@@ -23,7 +23,7 @@ def closeDB(exception):
 
 
 @app.errorhandler(404)
-def error_404(error):
+def not_found(error):
     '''Handles the 404 HTTP error code.'''
     return make_response(jsonify({'error': 'Not found'}), 404)
 
