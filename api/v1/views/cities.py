@@ -13,10 +13,12 @@ from models.state import State
 def list_cities_of_state(state_id):
     """Retrieves a list of cities for a given state."""
     all_states = storage.all(State).values()
-    state_obj = next((state for state in all_states if state.id == state_id), None)
+    state_obj = next((state for state
+                      in all_states if state.id == state_id), None)
     if not state_obj:
         abort(404)
-    list_cities = [city.to_dict() for city in storage.all(City).values() if city.state_id == state_id]
+    list_cities = [city.to_dict() for city in storage.all(City).
+                   values() if city.state_id == state_id]
     return jsonify(list_cities)
 
 
