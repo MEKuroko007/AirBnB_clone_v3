@@ -42,18 +42,28 @@ class DBStorage:
 
     def get(self, cls, id):
         """Retrieves an object of a class with a given id."""
-        if cls is None or not issubclass(cls, BaseModel):
+        if cls not in classes.values():
             return None
-        return self.__session.query.get(id)
+
+        Icls = models.storage.all(cls)
+        for value in Icls.values():
+            if (value.id == id):
+                return value
+
+        return None
 
     def count(self, cls=None):
         """Retrieves the number of objects of a class or all classes."""
-        query = (
-            self.__session.query(cls)
-            if cls
-            else self.__session.query(BaseModel)
-            )
-        return query.count()
+        classes = classes.values()
+
+        if not cls:
+            count = 0
+            for cl in classes:
+                count += len(models.storage.all(cl).values())
+        else:
+            count = len(models.storage.all(cls).values())
+
+        return count
 
     def all(self, cls=None):
         """query on the current database session"""
