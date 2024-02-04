@@ -30,15 +30,6 @@ def error_404(error):
     return jsonify(error='Not found'), 404
 
 
-@app.errorhandler(400)
-def error_400_handler(error):
-    '''Handles the 400 HTTP error code.'''
-    message = 'Bad request'
-    if isinstance(error, Exception) and hasattr(error, 'description'):
-        message = error.description
-    return jsonify(error=message), 400
-
-
 if __name__ == "__main__":
     host = getenv('HBNB_API_HOST', '0.0.0.0')
     port = int(getenv('HBNB_API_PORT', 5000))
