@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-"""Handles operations related to places."""
-from flask import jsonify, abort, request
+"""Handles RESTful API actions for Places."""
+from flask import jsonify, abort, request, make_response
 from api.v1.views import app_views
 from models import storage
 from models.city import City
@@ -8,10 +8,10 @@ from models.place import Place
 from models.user import User
 
 
-@app_views.route('/cities/<city_id>/places', methods=['GET'])
-@app_views.route('/cities/<city_id>/places/', methods=['GET'])
-def list_places_of_city(city_id):
-    """Lists all places in a city."""
+@app_views.route('/cities/<city_id>/places',
+                 methods=['GET'], strict_slashes=False)
+def get_places(city_id):
+    """Retrieves all places of a city."""
     city = storage.get(City, city_id)
     if not city:
         abort(404)
@@ -19,7 +19,8 @@ def list_places_of_city(city_id):
     return jsonify(places)
 
 
-@app_views.route('/places/<place_id>', methods=['GET'])
+@app_views.route('/places/<place_id>',
+                 methods=['GET'], strict_slashes=False)
 def get_place(place_id):
     """Retrieves a specific place."""
     place = storage.get(Place, place_id)
@@ -28,7 +29,8 @@ def get_place(place_id):
     return jsonify(place.to_dict())
 
 
-@app_views.route('/places/<place_id>', methods=['DELETE'])
+@app_views.route('/places/<place_id>',
+                 methods=['DELETE'], strict_slashes=False)
 def delete_place(place_id):
     """Deletes a place."""
     place = storage.get(Place, place_id)
@@ -39,7 +41,8 @@ def delete_place(place_id):
     return jsonify({}), 200
 
 
-@app_views.route('/cities/<city_id>/places', methods=['POST'])
+@app_views.route('/cities/<city_id>/places',
+                 methods=['POST'], strict_slashes=False)
 def create_place(city_id):
     """Creates a new place."""
     city = storage.get(City, city_id)
@@ -61,7 +64,8 @@ def create_place(city_id):
     return jsonify(new_place.to_dict()), 201
 
 
-@app_views.route('/places/<place_id>', methods=['PUT'])
+@app_views.route('/places/<place_id>',
+                 methods=['PUT'], strict_slashes=False)
 def update_place(place_id):
     """Updates a place."""
     place = storage.get(Place, place_id)
@@ -77,3 +81,25 @@ def update_place(place_id):
             setattr(place, field, request.json[field])
     storage.save()
     return jsonify(place.to_dict()), 200
+
+
+@app_views.route('/places_search',
+                 methods=['POST'], strict_slashes=False)
+def places_search():
+    """Searches for places based on given criteria."""
+    if not request.json:
+        abort(400, 'Request data must be in JSON format')
+    data = request.json
+    states = data.get('states', [])
+    cities = data.get('cities', [])
+    amenities = data.get('amenities', [])
+    places = storage.all(Place).values()
+
+    filtered_places = []
+    for place in places:
+        if (not states or place.city.state_id in states) and \
+           (not cities or place.city_id in cities) and \
+           (not amenities or all(amenity.id in place.
+                                 amenities for amenity in amenities)):
+            filtered_places.append(place.to_dict())
+    return jsonify(filtered_places)
